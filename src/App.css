@@ -1,0 +1,6 @@
+.video-player {
+  max-width: fit-content;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
