@@ -1,19 +1,40 @@
 import { Button } from "@/component/ui/button";
-import { cameraActions } from "@/store/context/cameraSlice";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Video, Mic, MicOff, VideoOff } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 type Props = {
   src: React.RefObject<HTMLVideoElement>;
+  muted?: boolean;
+  width?: number;
+  height?: number;
 };
 
-function VideoBox(props : Props) {
-  const dispatch = useAppDispatch();
-  const { audio, video } = useAppSelector((state) => state.camera);
+function VideoBox(props: Props) {
+  const stream = props.src.current?.srcObject as MediaStream;
+  const [videoEnable, setVideoEnable] = useState(true);
+  const [audioEnable, setAudioEnable] = useState(true);
+
+  function toogleVideo() {
+    const vtracks = stream.getVideoTracks();
+    if (vtracks.length) {
+      vtracks[0].enabled = !videoEnable;
+      setVideoEnable(!videoEnable);
+    }
+  }
+  function toogleAudio() {
+    const atracks = stream.getAudioTracks();
+    if (atracks.length) {
+      atracks[0].enabled = !audioEnable;
+      setAudioEnable(!audioEnable);
+    }
+  }
+
   return (
-    <div className="video-player">
+    <div className="flex flex-col md:flex-1 gap-2 justify-center w-full">
       <video
+        width={props.width}
+        height={props.height}
+        muted={props.muted}
         className="video"
         id="localvideo"
         ref={props.src}
@@ -23,18 +44,18 @@ function VideoBox(props : Props) {
         <Button
           variant={"outline"}
           onClick={() => {
-            dispatch(cameraActions.toggleVideo());
+            toogleVideo();
           }}
         >
-          {!video ? <VideoOff /> : <Video />}
+          {videoEnable ? <Video /> : <VideoOff />}
         </Button>
         <Button
           variant={"outline"}
           onClick={() => {
-            dispatch(cameraActions.toggleAudio());
+            toogleAudio();
           }}
         >
-          {!audio ? <MicOff /> : <Mic />}
+          {audioEnable ? <Mic /> : <MicOff />}
         </Button>
       </div>
     </div>
